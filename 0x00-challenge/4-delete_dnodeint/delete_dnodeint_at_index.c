@@ -11,43 +11,50 @@
  */
 int delete_dnodeint_at_index(dlistint_t **head, unsigned int index)
 {
-	dlistint_t *saved_head;
-	dlistint_t *tmp;
-	unsigned int p;
+    dlistint_t *saved_head, *tmp, *to_delete;
+    unsigned int p = 0;
 
-	if (*head == NULL)
-	{
-		return (-1);
-	}
-	saved_head = *head;
-	p = 0;
-	while (p < index && *head != NULL)
-	{
-		*head = (*head)->next;
-		p++;
-	}
-	if (p != index)
-	{
-		*head = saved_head;
-		return (-1);
-	}
-	if (0 == index)
-	{
-		tmp = (*head)->next;
-		free(*head);
-		*head = tmp;
-		if (tmp != NULL)
-		{
-			tmp->prev = NULL;
-		}
-	}
-	else
-	{
-		(*head)->prev->prev = (*head)->prev;
-		free(*head);
-		if ((*head)->next)
-			(*head)->next->prev = (*head)->prev;
-		*head = saved_head;
-	}
-	return (1);
+    if (*head == NULL)
+    {
+        return (-1);  /* Failure: List is empty */
+    }
+
+    saved_head = *head;
+
+    if (index == 0)
+    {
+        to_delete = *head;
+        *head = (*head)->next;
+        if (*head)
+        {
+            (*head)->prev = NULL;
+        }
+        free(to_delete);
+        return (1);  /* Success */
+    }
+
+    tmp = *head;
+    while (p < index - 1 && tmp != NULL)
+    {
+        tmp = tmp->next;
+        p++;
+    }
+
+    if (tmp == NULL || tmp->next == NULL)
+    {
+        *head = saved_head;
+        return (-1);  /* Failure: Index out of bounds */
+    }
+
+    to_delete = tmp->next;
+    tmp->next = to_delete->next;
+
+    if (to_delete->next)
+    {
+        to_delete->next->prev = tmp;
+    }
+
+    free(to_delete);
+    *head = saved_head;
+    return (1);  /* Success */
 }
